@@ -1,8 +1,40 @@
-# sysvm - java virtual machine
+# sysvm - java virtual machine implemented in C++
 
-Part of a Java Virtual Machine, written as a coursework during NSU's syspro's C++ course.
+## Milestones and plans:
+### First milestone:
+  - [ ] .class files parser
+  - [ ] simple VM that implements subset of spec(no native methods)
 
-## Team members:
-[Natalya Reshetnikova](https://github.com/NataliaResh/)
-<br>
-[Vladimir Zhakulin](https://github.com/chronorose)
+#### Criteria:
+Examples of programs that should be executed correctly:
+
+```Java
+class HelloVM {
+  public static void main(String[] args) {}
+}
+```
+
+```Java
+class Factorial {
+  public static void main(String[] args) {
+    factorial(5);
+  }
+  public int factorial(int n) {
+    if (n <= 2) {
+      return n;
+    }
+    return n * factorial(n - 1);
+  }
+}
+```
+ 
+### Second milestone:
+  - [ ] Garbage collector(single-threaded)
+  - [ ] native methods
+
+#### Criteria:
+Infinite loop doesn't throw OOM exception;
+
+### Third milestone:
+  - [ ] Parallel GC
+  - [ ] Overall improvements across the board
