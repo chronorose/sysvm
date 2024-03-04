@@ -1,3 +1,4 @@
-*/.class
-build
+*.class
+build/*
 a.out
+examples/workspace/

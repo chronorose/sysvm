@@ -53,7 +53,7 @@ ClassFile readClassFile(ifstream& is) {
 }
 
 int main() {
-    ifstream is("../examples/HelloVM.class", ios::binary);
+    ifstream is("examples/HelloVM.class", ios::binary);
     ClassFile cf = readClassFile(is); 
     cout << cf.minor_version << " " << cf.major_version << " " << cf.constant_pool_count;
 }
