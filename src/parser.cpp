@@ -7,8 +7,8 @@
 using namespace std;
 
 struct CP_info {
-    unsigned char tag;
-    unsigned char info;
+    unsigned char tag = 0;
+    virtual ~CP_info() {}
 };
 
 struct C_Class: public CP_info {
@@ -132,7 +132,18 @@ ClassFile readClassFile(ifstream& is) {
 }
 
 int main() {
-    ifstream is("examples/HelloVM.class", ios::binary);
-    ClassFile cf = readClassFile(is); 
-    cout << cf.minor_version << " " << cf.major_version << " " << cf.constant_pool_count;
+    // ifstream is("examples/HelloVM.class", ios::binary);
+    // ClassFile cf = readClassFile(is); 
+    // cout << cf.minor_version << " " << cf.major_version << " " << cf.constant_pool_count;
+    vector<CP_info*>* vec = new vector<CP_info*>;
+    C_Class* something = new C_Class;
+    something->name_index = 344;
+    vec->push_back(something);
+    vec->at(0)->tag = 7;
+    cout << (unsigned int)vec->at(0)->tag;
+    C_Class* som = dynamic_cast<C_Class*>(vec->at(0));
+    cout << (unsigned int)som->tag;
+    cout << (unsigned int)som->name_index;
+    delete something;
+    delete vec;
 }
