@@ -5,6 +5,8 @@
 #include <iostream>
 #include <cstdlib>
 
+void readToBuf(std::ifstream& is, char* buffer, size_t n);
+
 template<typename T> void swap(T& a, T& b) {
     T tmp = a;
     a = b;

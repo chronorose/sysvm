@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Common.hpp"
+
 struct CP_info {
     unsigned char tag = 0;
     virtual ~CP_info() {}
@@ -9,6 +11,34 @@ struct Attribute {
     unsigned short name_index;
     unsigned int attribute_length;
     unsigned char* info;
+    Attribute(std::ifstream& is) {
+        name_index = readbytes<unsigned short>(is);
+        attribute_length = readbytes<unsigned int>(is);
+        info = new unsigned char[attribute_length + 1];
+        readToBuf(is, (char*)info, attribute_length);
+        info[attribute_length] = '\0';
+    }
+    // Attribute(const Attribute& other) {
+    //     name_index = other.name_index;
+    //     attribute_length = other.attribute_length;
+    //     info = new unsigned char[attribute_length + 1];
+    //     for (size_t i = 0; i < attribute_length + 1; i++) {
+    //         info[i] = other.info[i];
+    //     }
+    // }
+    // Attribute& operator=(const Attribute& other) {
+    //     delete[] info;
+    //     name_index = other.name_index;
+    //     attribute_length = other.attribute_length;
+    //     info = new unsigned char[attribute_length + 1];
+    //     for (size_t i = 0; i < attribute_length + 1; i++) {
+    //         info[i] = other.info[i];
+    //     }
+    //     return *this;
+    // }
+    ~Attribute() {
+        delete[] info;
+    }
 };
 
 struct Field {
@@ -16,7 +46,24 @@ struct Field {
     unsigned short name_index;
     unsigned short descriptor_index;
     unsigned short attributes_count;  
-    Attribute* attributes;
+    std::vector<Attribute*>* attributes;
+    Field(std::ifstream& is) {
+        access_flags = readbytes<unsigned short>(is);
+        name_index = readbytes<unsigned short>(is);
+        descriptor_index = readbytes<unsigned short>(is);
+        attributes_count = readbytes<unsigned short>(is);
+        attributes = new std::vector<Attribute*>;
+        for (size_t i = 0; i < attributes_count; i++) {
+            Attribute* attr = new Attribute(is);
+            attributes->push_back(attr);
+        }
+    }
+    ~Field() {
+        for (size_t i = 0; i < attributes->size(); i++) {
+            delete attributes->at(i);
+        }
+        delete attributes;
+    }
 };
 
 struct Method {
@@ -24,7 +71,34 @@ struct Method {
     unsigned short name_index;  
     unsigned short descriptor_index;
     unsigned short attributes_count;
-    Attribute* attributes;
+    std::vector<Attribute*>* attributes;
+    Method(std::ifstream& is) {
+        access_flags = readbytes<unsigned short>(is);    
+        name_index = readbytes<unsigned short>(is);    
+        descriptor_index = readbytes<unsigned short>(is);    
+        attributes_count = readbytes<unsigned short>(is);    
+        attributes = new std::vector<Attribute*>;
+        for (size_t i = 0; i < attributes_count; i++) {
+            Attribute* attr = new Attribute(is);
+            attributes->push_back(attr);
+        }
+    }
+    // Method(const Method& other) {
+    //     access_flags = other.access_flags;
+    //     name_index = other.name_index;
+    //     descriptor_index = other.descriptor_index;
+    //     attributes_count = other.attributes_count;
+    //     attributes = new std::vector<Attribute>(attributes_count);
+    //     for (size_t i = 0; i < attributes_count; i++) {
+    //         attributes->at(i) = other.attributes->at(i);
+    //     }
+    // }
+    ~Method() {
+        for (size_t i = 0; i < attributes->size(); i++) {
+            delete attributes->at(i);
+        }
+        delete attributes;
+    }
 };
 
 struct C_Class: public CP_info {

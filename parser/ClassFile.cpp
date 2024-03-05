@@ -144,7 +144,27 @@ ClassFile::ClassFile(ifstream& is) {
     for (size_t i = 0; i < interfaces_count; i++) {
         interfaces[i] = readbytes<unsigned short>(is);
     }
-    cout << hex << (int)access_flags;
+    fields_count = readbytes<unsigned short>(is);
+    fields = new vector<Field*>;
+    for (size_t i = 0; i < fields_count; i++) {
+        Field* fld = new Field(is);
+        fields->push_back(fld);
+    }   
+    methods_count = readbytes<unsigned short>(is);
+    methods = new vector<Method*>;
+    for (size_t i = 0; i < methods_count; i++) {
+        Method* mthd = new Method(is);
+        methods->push_back(mthd);
+    }
+    attributes_count = readbytes<unsigned short>(is);
+    attributes = new vector<Attribute*>;
+    for (size_t i = 0; i < attributes_count; i++) {
+        Attribute* attr = new Attribute(is);
+        attributes->push_back(attr);
+    }
+    C_Class* cls = dynamic_cast<C_Class*>(constant_pool->at(this_class - 1));
+    C_Utf8* utf = dynamic_cast<C_Utf8*>(constant_pool->at(cls->name_index - 1));
+    cout << utf->bytes;
 }
 
 ClassFile::~ClassFile() {
@@ -159,5 +179,17 @@ ClassFile::~ClassFile() {
     }
     delete constant_pool;
     delete[] interfaces;
+    for (size_t i = 0; i < fields->size(); i++) {
+        delete fields->at(i);
+    }
+    delete fields;
+    for (size_t i = 0; i < methods->size(); i++) {
+        delete methods->at(i);
+    }
+    delete methods;
+    for (size_t i = 0; i < attributes->size(); i++) {
+        delete attributes->at(i);
+    }
+    delete attributes;
 }
 
