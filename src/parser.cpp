@@ -89,7 +89,6 @@ struct C_InvokeDynamic: public CP_info {
 // assumes a valid pointer to allocated memory which is enough; else UB
 void readToBuf(ifstream& is, char* buffer, size_t n) {
     is.read(buffer, n);
-    reverseArray(buffer, n);
 }
 
 class ClassFile {
@@ -207,8 +206,9 @@ class ClassFile {
             case 1: {
                 C_Utf8* utf = new C_Utf8;
                 utf->len = readbytes<unsigned short>(is);
-                utf->bytes = new unsigned char[utf->len];
+                utf->bytes = new unsigned char[utf->len + 1];
                 readToBuf(is, (char*) utf->bytes, utf->len);
+                utf->bytes[utf->len] = '\0';
                 constant_pool->push_back(utf);
                 constant_pool->at(i)->tag = 1;
                 break;
