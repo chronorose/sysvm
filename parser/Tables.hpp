@@ -5,6 +5,28 @@ struct CP_info {
     virtual ~CP_info() {}
 };
 
+struct Attribute {
+    unsigned short name_index;
+    unsigned int attribute_length;
+    unsigned char* info;
+};
+
+struct Field {
+    unsigned short access_flags;
+    unsigned short name_index;
+    unsigned short descriptor_index;
+    unsigned short attributes_count;  
+    Attribute* attributes;
+};
+
+struct Method {
+    unsigned short access_flags;
+    unsigned short name_index;  
+    unsigned short descriptor_index;
+    unsigned short attributes_count;
+    Attribute* attributes;
+};
+
 struct C_Class: public CP_info {
     unsigned char tag = 7;
     unsigned short name_index;  

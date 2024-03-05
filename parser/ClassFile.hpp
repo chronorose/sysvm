@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Common.hpp"
-#include "ConstantPool.hpp"
+#include "Tables.hpp"
 
 class ClassFile {
     unsigned int counter = 0;

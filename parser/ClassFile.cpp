@@ -1,7 +1,6 @@
 #include "Common.hpp"
 #include "ClassFile.hpp"
-#include "ConstantPool.hpp"
-#include <algorithm>
+#include "Tables.hpp"
 
 using namespace std;
 
@@ -146,9 +145,6 @@ ClassFile::ClassFile(ifstream& is) {
         interfaces[i] = readbytes<unsigned short>(is);
     }
     cout << hex << (int)access_flags;
-    C_Class* cls = dynamic_cast<C_Class*>(constant_pool->at(this_class - 1));
-    C_Utf8* utf = dynamic_cast<C_Utf8*>(constant_pool->at(cls->name_index - 1));
-    cout << utf->bytes;
 }
 
 ClassFile::~ClassFile() {
