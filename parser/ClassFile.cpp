@@ -164,7 +164,11 @@ ClassFile::ClassFile(ifstream& is) {
     }
     C_Class* cls = dynamic_cast<C_Class*>(constant_pool->at(this_class - 1));
     C_Utf8* utf = dynamic_cast<C_Utf8*>(constant_pool->at(cls->name_index - 1));
-    cout << utf->bytes;
+    cout << utf->bytes << endl;
+    cout << methods_count << endl;
+    Method* mthd = methods->at(1);
+    C_Utf8* utf1 = dynamic_cast<C_Utf8*>(constant_pool->at(mthd->name_index - 1));
+    cout << utf1->bytes << endl;
 }
 
 ClassFile::~ClassFile() {
