@@ -134,7 +134,7 @@ ClassFile::ClassFile(ifstream& is) {
     major_version= readbytes<unsigned short>(is);
     constant_pool_count= readbytes<unsigned short>(is);
     constant_pool = new vector<CP_info*>;
-    for (size_t i = 0; i < constant_pool_count; i++) {
+    for (size_t i = 0; i < constant_pool_count - 1; i++) {
         readCPinfo(is);
     }
     access_flags = readbytes<unsigned short>(is);
@@ -145,8 +145,10 @@ ClassFile::ClassFile(ifstream& is) {
     for (size_t i = 0; i < interfaces_count; i++) {
         interfaces[i] = readbytes<unsigned short>(is);
     }
-    cout << hex << magic << " "; 
-    cout << minor_version;
+    cout << hex << (int)access_flags;
+    C_Class* cls = dynamic_cast<C_Class*>(constant_pool->at(this_class - 1));
+    C_Utf8* utf = dynamic_cast<C_Utf8*>(constant_pool->at(cls->name_index - 1));
+    cout << utf->bytes;
 }
 
 ClassFile::~ClassFile() {

@@ -4,6 +4,7 @@
 #include "ConstantPool.hpp"
 
 class ClassFile {
+    unsigned int counter = 0;
     unsigned int magic;
     unsigned short minor_version;
     unsigned short major_version;  
