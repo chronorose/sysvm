@@ -97,6 +97,7 @@ class ClassFile {
     unsigned short major_version;  
     unsigned short constant_pool_count;
     vector<CP_info*>* constant_pool = nullptr;
+    void readCPinfo(ifstream& is);
 };
 
 template<typename T> void swap(T* a, T* b) {
@@ -122,6 +123,12 @@ template<typename T> T readbytes(ifstream& is) {
     return ret;
 }
 
+// assumes a valid pointer to allocated memory which is enough; else UB
+void readToBuf(ifstream& is, char* buffer, size_t n) {
+    is.read(buffer, n);
+    reverseArray(buffer, n);
+}
+
 ClassFile readClassFile(ifstream& is) {
     ClassFile cf;
     cf.magic = readbytes<unsigned int>(is);
@@ -131,19 +138,139 @@ ClassFile readClassFile(ifstream& is) {
     return cf;
 }
 
+// reads one CPinfo struct from constant pool;
+// takes vector of CPinfo and input stream;
+void readCPinfo(vector<CP_info*>& vec, ifstream& is) {
+    unsigned char tag = readbytes<unsigned char>(is);
+    size_t i = vec.size();
+    switch (tag) {
+        case 7: {
+            C_Class* cls = new C_Class;
+            cls->name_index = readbytes<unsigned short>(is);
+            vec.push_back(cls);
+            vec.at(i)->tag = 7;
+            break;
+        }
+        case 9: {
+            C_Fieldref* fld = new C_Fieldref;
+            fld->class_index = readbytes<unsigned short>(is);
+            fld->name_and_type = readbytes<unsigned short>(is);
+            vec.push_back(fld);
+            vec.at(i)->tag = 9;
+            break;
+        }
+        case 10: {
+            C_Methodref* mthd = new C_Methodref;
+            mthd->class_index = readbytes<unsigned short>(is);
+            mthd->name_and_type = readbytes<unsigned short>(is);
+            vec.push_back(mthd);
+            vec.at(i)->tag = 10;
+            break;
+        }
+        case 11: {
+            C_InterfaceMethodref* imthd = new C_InterfaceMethodref;
+            imthd->class_index= readbytes<unsigned short>(is);
+            imthd->name_and_type = readbytes<unsigned short>(is);
+            vec.push_back(imthd);
+            vec.at(i)->tag = 11;
+            break;
+        }
+        case 8: {
+            C_String* str = new C_String;
+            str->string_index = readbytes<unsigned short>(is);
+            vec.push_back(str);
+            vec.at(i)->tag = 8;
+            break;
+        }
+        case 3: {
+            C_Integer* integer = new C_Integer;
+            integer->bytes = readbytes<unsigned int>(is);
+            vec.push_back(integer);
+            vec.at(i)->tag = 3;
+            break;
+        }
+        case 4: {
+            C_Float* flt = new C_Float;
+            flt->bytes = readbytes<unsigned int>(is);
+            vec.push_back(flt);
+            vec.at(i)->tag = 4;
+            break;
+        }
+        case 5: {
+            C_Long* lng = new C_Long;
+            lng->high_bytes = readbytes<unsigned int>(is);
+            lng->low_bytes = readbytes<unsigned int>(is);
+            vec.push_back(lng);
+            vec.at(i)->tag = 5;
+            break;
+        }
+        case 6: {
+            C_Double * dbl = new C_Double;
+            dbl->high_bytes = readbytes<unsigned int>(is);
+            dbl->low_bytes = readbytes<unsigned int>(is);
+            vec.push_back(dbl);
+            vec.at(i)->tag = 6;
+            break;
+        }
+        case 12: {
+            C_NameAndType* nat = new C_NameAndType;
+            nat->name_index = readbytes<unsigned short>(is);
+            nat->descriptor = readbytes<unsigned short>(is);
+            vec.push_back(nat);
+            vec.at(i)->tag = 12;
+            break;
+        }
+        case 1: {
+            C_Utf8* utf = new C_Utf8;
+            utf->len = readbytes<unsigned short>(is);
+            utf->bytes = new unsigned char[utf->len];
+            readToBuf(is, (char*) utf->bytes, utf->len);
+            vec.push_back(utf);
+            vec.at(i)->tag = 1;
+            break;
+        }
+        case 15: {
+            C_MethodHandle* mhandle = new C_MethodHandle;
+            mhandle->reference_kind = readbytes<unsigned char>(is);
+            mhandle->reference_index = readbytes<unsigned short>(is);
+            vec.push_back(mhandle);
+            vec.at(i)->tag = 15;
+            break;
+        }
+        case 16: {
+            C_MethodType* mtype = new C_MethodType;
+            mtype->descriptor_index = readbytes<unsigned short>(is);
+            vec.push_back(mtype);
+            vec.at(i)->tag = 16;
+            break;
+        }
+        case 18: {
+            C_InvokeDynamic* invdyn = new C_InvokeDynamic;
+            invdyn->bootstrap_method_attr_index = readbytes<unsigned short>(is);
+            invdyn->name_and_type = readbytes<unsigned short>(is);
+            vec.push_back(invdyn);
+            vec.at(i)->tag = 18;
+            break;
+        }
+    }
+}
+
 int main() {
-    // ifstream is("examples/HelloVM.class", ios::binary);
-    // ClassFile cf = readClassFile(is); 
-    // cout << cf.minor_version << " " << cf.major_version << " " << cf.constant_pool_count;
+    ifstream is("../examples/HelloVM.class", ios::binary);
+    ClassFile cf = readClassFile(is); 
+    cout << cf.minor_version << " " << cf.major_version << " " << cf.constant_pool_count;
     vector<CP_info*>* vec = new vector<CP_info*>;
-    C_Class* something = new C_Class;
-    something->name_index = 344;
-    vec->push_back(something);
-    vec->at(0)->tag = 7;
-    cout << (unsigned int)vec->at(0)->tag;
-    C_Class* som = dynamic_cast<C_Class*>(vec->at(0));
-    cout << (unsigned int)som->tag;
-    cout << (unsigned int)som->name_index;
-    delete something;
-    delete vec;
+    readCPinfo(*vec, is);
+    cout << (int)vec->at(0)->tag;
+    // vector<CP_info*>* vec = new vector<CP_info*>;
+    // C_Class* something = new C_Class;
+    // something->name_index = 344;
+    // vec->push_back(something);
+    // vec->at(0)->tag = 7;
+    // cout << (unsigned int)vec->at(0)->tag;
+    // C_Class* som = dynamic_cast<C_Class*>(vec->at(0));
+    // cout << (unsigned int)som->tag;
+    // cout << (unsigned int)som->name_index;
+    // delete something;
+    // delete vec;
 }
