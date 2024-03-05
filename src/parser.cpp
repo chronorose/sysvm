@@ -1,90 +1,7 @@
 #include "stuff.hpp"
+#include "c_pool.hpp"
 
 using namespace std;
-
-struct CP_info {
-    unsigned char tag = 0;
-    virtual ~CP_info() {}
-};
-
-struct C_Class: public CP_info {
-    unsigned char tag = 7;
-    unsigned short name_index;  
-};
-
-struct C_Fieldref: public CP_info {
-    unsigned char tag = 9;
-    unsigned short class_index;
-    unsigned short name_and_type;
-};
-
-struct C_Methodref: public CP_info {
-    unsigned char tag = 10;
-    unsigned short class_index;
-    unsigned short name_and_type;
-};
-
-struct C_InterfaceMethodref: public CP_info {
-    unsigned char tag = 11;  
-    unsigned short class_index;
-    unsigned short name_and_type;
-};
-
-struct C_String: public CP_info {
-    unsigned char tag = 8;
-    unsigned short string_index;
-};
-
-struct C_Integer: public CP_info {
-    unsigned char tag = 3;
-    unsigned int bytes;  
-};
-
-struct C_Float: public CP_info {
-    unsigned char tag = 4;
-    unsigned int bytes;
-};
-
-struct C_Long: public CP_info {
-    unsigned char tag = 5;
-    unsigned int high_bytes;
-    unsigned int low_bytes;
-};
-
-struct C_Double: public CP_info {
-    unsigned char tag = 6;
-    unsigned int high_bytes;
-    unsigned int low_bytes;
-};
-
-struct C_NameAndType: public CP_info {
-    unsigned char tag = 12;
-    unsigned short name_index;
-    unsigned short descriptor;
-};
-
-struct C_Utf8: public CP_info {
-    unsigned char tag = 1;
-    unsigned short len;
-    unsigned char* bytes;
-};
-
-struct C_MethodHandle: public CP_info {
-    unsigned char tag = 15;
-    unsigned char reference_kind;
-    unsigned short reference_index;  
-};
-
-struct C_MethodType: public CP_info {
-    unsigned char tag = 16;
-    unsigned short descriptor_index;
-};
-
-struct C_InvokeDynamic: public CP_info {
-    unsigned char tag = 18;
-    unsigned short bootstrap_method_attr_index;  
-    unsigned short name_and_type;
-};
 
 // assumes a valid pointer to allocated memory which is enough; else UB
 void readToBuf(ifstream& is, char* buffer, size_t n) {
@@ -98,6 +15,12 @@ class ClassFile {
     unsigned short major_version;  
     unsigned short constant_pool_count;
     vector<CP_info*>* constant_pool = nullptr;
+    unsigned short access_flags;
+    unsigned short this_class;
+    unsigned short super_class;
+    unsigned short interfaces_count;
+    unsigned short* interfaces;
+    unsigned short fields_count;
 
     ClassFile(ifstream& is) {
         magic = readbytes<unsigned int>(is);
@@ -107,6 +30,14 @@ class ClassFile {
         constant_pool = new vector<CP_info*>;
         for (size_t i = 0; i < constant_pool_count; i++) {
             readCPinfo(is);
+        }
+        access_flags = readbytes<unsigned short>(is);
+        this_class = readbytes<unsigned short>(is);
+        super_class = readbytes<unsigned short>(is);
+        interfaces_count = readbytes<unsigned short>(is);
+        interfaces = new unsigned short[interfaces_count];
+        for (size_t i = 0; i < interfaces_count; i++) {
+            interfaces[i] = readbytes<unsigned short>(is);
         }
     }
     ~ClassFile() {
@@ -120,6 +51,7 @@ class ClassFile {
             }
         }
         delete constant_pool;
+        delete[] interfaces;
     }
     // reads one CPinfo struct from constant pool;
     // takes vector of CPinfo and input stream;
