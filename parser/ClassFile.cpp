@@ -93,12 +93,15 @@ void ClassFile::readCPinfo(ifstream& is) {
         }
         case 1: {
             C_Utf8* utf = new C_Utf8;
-            utf->len = readbytes<unsigned short>(is);
-            utf->bytes = new unsigned char[utf->len + 1];
-            readToBuf(is, (char*) utf->bytes, utf->len);
-            utf->bytes[utf->len] = '\0';
+            unsigned short len = readbytes<unsigned short>(is);
+            char* bytes = new char[len + 1];
+            readToBuf(is, bytes, len);
+            bytes[len] = '\0';
+            utf->bytes = new string;
+            *utf->bytes = bytes;
             constant_pool->push_back(utf);
             constant_pool->at(i)->tag = 1;
+            delete[] bytes;
             break;
         }
         case 15: {
@@ -162,20 +165,23 @@ ClassFile::ClassFile(ifstream& is) {
         Attribute* attr = new Attribute(is);
         attributes->push_back(attr);
     }
-    C_Class* cls = dynamic_cast<C_Class*>(constant_pool->at(this_class - 1));
-    C_Utf8* utf = dynamic_cast<C_Utf8*>(constant_pool->at(cls->name_index - 1));
-    cout << utf->bytes << endl;
-    cout << methods_count << endl;
+    // C_Class* cls = dynamic_cast<C_Class*>(constant_pool->at(this_class - 1));
+    // C_Utf8* utf = dynamic_cast<C_Utf8*>(constant_pool->at(cls->name_index - 1));
+    // cout << *utf->bytes << endl;
+    // cout << methods_count << endl;
     Method* mthd = methods->at(1);
-    C_Utf8* utf1 = dynamic_cast<C_Utf8*>(constant_pool->at(mthd->name_index - 1));
-    cout << utf1->bytes << endl;
+    // cout << mthd->attributes_count;
+    C_Utf8* utf1 = dynamic_cast<C_Utf8*>(constant_pool->at(mthd->attributes->at(0)->name_index - 1));
+    cout << *utf1->bytes;
+    // C_Utf8* utf1 = dynamic_cast<C_Utf8*>(constant_pool->at(mthd->attributes));
+    // cout << *utf1->bytes << endl;
 }
 
 ClassFile::~ClassFile() {
     for (size_t i = 0; i < constant_pool->size(); i++) {
         if (constant_pool->at(i)->tag == 1) {
             C_Utf8* utf = dynamic_cast<C_Utf8*>(constant_pool->at(i));
-            delete[] utf->bytes;
+            delete utf->bytes;
             delete utf;
         } else {
             delete constant_pool->at(i);

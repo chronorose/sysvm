@@ -159,8 +159,7 @@ struct C_NameAndType: public CP_info {
 
 struct C_Utf8: public CP_info {
     unsigned char tag = 1;
-    unsigned short len;
-    unsigned char* bytes;
+    std::string* bytes;
 };
 
 struct C_MethodHandle: public CP_info {

@@ -2,7 +2,7 @@
 
 ## Milestones and plans:
 ### First milestone:
-  - [x] .class files parser
+  - [ ] .class files parser
   - [ ] simple VM that implements subset of spec(no native methods)
 
 #### Criteria:
