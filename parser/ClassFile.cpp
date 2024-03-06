@@ -162,15 +162,17 @@ ClassFile::ClassFile(ifstream& is) {
         interfaces[i] = readbytes<unsigned short>(is);
     }
     fields_count = readbytes<unsigned short>(is);
-    fields = new vector<Field*>;
+    fields = new vector<Field>;
     for (size_t i = 0; i < fields_count; i++) {
-        Field* fld = new Field(is);
+        Field fld(is);
+        // Field fld = new Field(is);
         fields->push_back(fld);
     }   
     methods_count = readbytes<unsigned short>(is);
-    methods = new vector<Method*>;
+    methods = new vector<Method>;
     for (size_t i = 0; i < methods_count; i++) {
-        Method* mthd = new Method(is);
+        Method mthd(is);
+        // Method* mthd = new Method(is);
         methods->push_back(mthd);
     }
     attributes_count = readbytes<unsigned short>(is);
@@ -183,9 +185,9 @@ ClassFile::ClassFile(ifstream& is) {
     // C_Utf8* utf = dynamic_cast<C_Utf8*>(constant_pool->at(cls->name_index - 1));
     // cout << *utf->bytes << endl;
     // cout << methods_count << endl;
-    Method* mthd = methods->at(1);
+    Method mthd = methods->at(1);
     // cout << mthd->attributes_count;
-    C_Utf8* utf1 = dynamic_cast<C_Utf8*>(constant_pool->at(mthd->attributes->at(0)->name_index - 1));
+    C_Utf8* utf1 = dynamic_cast<C_Utf8*>(constant_pool->at(mthd.attributes.at(0).name_index - 1));
     cout << *utf1->bytes;
     // C_Utf8* utf1 = dynamic_cast<C_Utf8*>(constant_pool->at(mthd->attributes));
     // cout << *utf1->bytes << endl;
@@ -203,13 +205,13 @@ ClassFile::~ClassFile() {
     }
     delete constant_pool;
     delete[] interfaces;
-    for (size_t i = 0; i < fields->size(); i++) {
-        delete fields->at(i);
-    }
+    // for (size_t i = 0; i < fields->size(); i++) {
+    //     delete fields->at(i);
+    // }
     delete fields;
-    for (size_t i = 0; i < methods->size(); i++) {
-        delete methods->at(i);
-    }
+    // for (size_t i = 0; i < methods->size(); i++) {
+    //     delete methods->at(i);
+    // }
     delete methods;
     for (size_t i = 0; i < attributes->size(); i++) {
         delete attributes->at(i);

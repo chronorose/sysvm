@@ -22,9 +22,9 @@ class ClassFile {
     unsigned short interfaces_count;
     unsigned short* interfaces;
     unsigned short fields_count;
-    std::vector<Field*>* fields = nullptr;
+    std::vector<Field>* fields = nullptr;
     unsigned short methods_count;
-    std::vector<Method*>* methods = nullptr;
+    std::vector<Method>* methods = nullptr;
     unsigned short attributes_count;
     std::vector<Attribute*>* attributes = nullptr;
     void readCPinfo(std::ifstream& is);
