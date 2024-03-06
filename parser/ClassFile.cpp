@@ -4,9 +4,23 @@
 
 using namespace std;
 
+// TODO: watch out for double and long structs in CP
+
 // assumes a valid pointer to allocated memory which is enough; else UB
 void readToBuf(ifstream& is, char* buffer, size_t n) {
     is.read(buffer, n);
+}
+
+CP_info* ClassFile::getCP(const unsigned short index) const {
+    return constant_pool->at(index - 1);
+}
+
+// gets you utf8 on the index in constant pool you specified;
+// or gets you killed in the process;
+// there's so much which could go wrong here, it's insane.
+C_Utf8* ClassFile::getUtf8(const unsigned short index) const {
+    // C_Utf8* ret = dynamic_cast<C_Utf8*>(this->constant_pool->at(index - 1));
+    return CPi_cast<C_Utf8*>(getCP(index - 1));
 }
 
 // reads one CPinfo struct from constant pool;

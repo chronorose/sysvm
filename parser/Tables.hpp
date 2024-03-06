@@ -7,6 +7,21 @@ struct CP_info {
     virtual ~CP_info() {}
 };
 
+struct ExceptionTable {
+    unsigned short start_pc;
+    unsigned short end_pc;
+    unsigned short handler_pc;
+    unsigned short catch_type;
+};
+
+struct Code {
+    unsigned short attribute_name_index;  
+    unsigned int attribute_length;
+    unsigned short max_stack;
+    unsigned int code_length;
+    std::string* code;
+};
+
 struct Attribute {
     unsigned short name_index;
     unsigned int attribute_length;
@@ -47,23 +62,23 @@ struct Field {
     unsigned short descriptor_index;
     unsigned short attributes_count;  
     std::vector<Attribute*>* attributes;
-    Field(std::ifstream& is) {
-        access_flags = readbytes<unsigned short>(is);
-        name_index = readbytes<unsigned short>(is);
-        descriptor_index = readbytes<unsigned short>(is);
-        attributes_count = readbytes<unsigned short>(is);
-        attributes = new std::vector<Attribute*>;
-        for (size_t i = 0; i < attributes_count; i++) {
-            Attribute* attr = new Attribute(is);
-            attributes->push_back(attr);
-        }
-    }
-    ~Field() {
-        for (size_t i = 0; i < attributes->size(); i++) {
-            delete attributes->at(i);
-        }
-        delete attributes;
-    }
+    // Field(std::ifstream& is) {
+    //     access_flags = readbytes<unsigned short>(is);
+    //     name_index = readbytes<unsigned short>(is);
+    //     descriptor_index = readbytes<unsigned short>(is);
+    //     attributes_count = readbytes<unsigned short>(is);
+    //     attributes = new std::vector<Attribute*>;
+    //     for (size_t i = 0; i < attributes_count; i++) {
+    //         Attribute* attr = new Attribute(is);
+    //         attributes->push_back(attr);
+    //     }
+    // }
+    // ~Field() {
+    //     for (size_t i = 0; i < attributes->size(); i++) {
+    //         delete attributes->at(i);
+    //     }
+    //     delete attributes;
+    // }
 };
 
 struct Method {
@@ -72,17 +87,18 @@ struct Method {
     unsigned short descriptor_index;
     unsigned short attributes_count;
     std::vector<Attribute*>* attributes;
-    Method(std::ifstream& is) {
-        access_flags = readbytes<unsigned short>(is);    
-        name_index = readbytes<unsigned short>(is);    
-        descriptor_index = readbytes<unsigned short>(is);    
-        attributes_count = readbytes<unsigned short>(is);    
-        attributes = new std::vector<Attribute*>;
-        for (size_t i = 0; i < attributes_count; i++) {
-            Attribute* attr = new Attribute(is);
-            attributes->push_back(attr);
-        }
-    }
+    // Method(std::ifstream& is) {
+    //     access_flags = readbytes<unsigned short>(is);    
+    //     name_index = readbytes<unsigned short>(is);    
+    //     descriptor_index = readbytes<unsigned short>(is);    
+    //     attributes_count = readbytes<unsigned short>(is);    
+    //     attributes = new std::vector<Attribute*>;
+    //     for (size_t i = 0; i < attributes_count; i++) {
+    //         Attribute* attr = new Attribute(is);
+    //         if ()
+    //         attributes->push_back(attr);
+    //     }
+    // }
     // Method(const Method& other) {
     //     access_flags = other.access_flags;
     //     name_index = other.name_index;
@@ -93,12 +109,12 @@ struct Method {
     //         attributes->at(i) = other.attributes->at(i);
     //     }
     // }
-    ~Method() {
-        for (size_t i = 0; i < attributes->size(); i++) {
-            delete attributes->at(i);
-        }
-        delete attributes;
-    }
+    // ~Method() {
+    //     for (size_t i = 0; i < attributes->size(); i++) {
+    //         delete attributes->at(i);
+    //     }
+    //     delete attributes;
+    // }
 };
 
 struct C_Class: public CP_info {
