@@ -2,6 +2,8 @@
 
 #include "Common.hpp"
 
+using namespace std;
+
 struct CP_info {
     unsigned char tag = 0;
     virtual ~CP_info() {}
@@ -19,7 +21,7 @@ struct Code {
     unsigned int attribute_length;
     unsigned short max_stack;
     unsigned int code_length;
-    std::string* code;
+    string* code;
 };
 
 struct Attribute {
@@ -31,7 +33,7 @@ struct Attribute {
         attribute_length = 0;
         info = nullptr;
     }
-    Attribute(std::ifstream& is) {
+    Attribute(ifstream& is) {
         name_index = readbytes<unsigned short>(is);
         attribute_length = readbytes<unsigned int>(is);
         info = new unsigned char[attribute_length + 1];
@@ -68,26 +70,33 @@ struct Field {
     unsigned short name_index;
     unsigned short descriptor_index;
     unsigned short attributes_count;  
-    std::vector<Attribute>* attributes;
-    Field(std::ifstream& is) {
+    vector<Attribute> attributes;
+    Field(ifstream& is) {
         access_flags = readbytes<unsigned short>(is);
         name_index = readbytes<unsigned short>(is);
         descriptor_index = readbytes<unsigned short>(is);
         attributes_count = readbytes<unsigned short>(is);
-        attributes = new std::vector<Attribute>;
         for (size_t i = 0; i < attributes_count; i++) {
-            // Attribute* attr = new Attribute(is);
             Attribute attr(is);
-            attributes->push_back(attr);
+            attributes.push_back(attr);
         }
-        std :: cout << "ok";
-        std :: cout << attributes->at(0).name_index;
     }
-    ~Field() {
-        // for (size_t i = 0; i < attributes->size(); i++) {
-        //     delete attributes->at(i);
-        // }
-        delete attributes;
+    Field(const Field& other) {
+        access_flags = other.access_flags;
+        name_index = other.access_flags;
+        descriptor_index = other.descriptor_index;
+        attributes_count = other.attributes_count;
+        attributes = other.attributes;
+    }
+    Field& operator=(const Field& other) {
+        if (this != &other) {
+            access_flags = other.access_flags;
+            name_index = other.access_flags;
+            descriptor_index = other.descriptor_index;
+            attributes_count = other.attributes_count;
+            attributes = other.attributes;
+        }
+        return *this;
     }
 };
 
@@ -96,14 +105,12 @@ struct Method {
     unsigned short name_index;  
     unsigned short descriptor_index;
     unsigned short attributes_count;
-    std::vector<Attribute> attributes;
-    Method(std::ifstream& is) {
+    vector<Attribute> attributes;
+    Method(ifstream& is) {
         access_flags = readbytes<unsigned short>(is);    
         name_index = readbytes<unsigned short>(is);    
         descriptor_index = readbytes<unsigned short>(is);    
         attributes_count = readbytes<unsigned short>(is);    
-        // attributes = new std::vector<Attribute>;
-        attributes.reserve(attributes_count);
         for (size_t i = 0; i < attributes_count; i++) {
             Attribute attr(is);
             attributes.push_back(attr);
@@ -115,10 +122,6 @@ struct Method {
         descriptor_index = other.descriptor_index;
         attributes_count = other.attributes_count;
         attributes = other.attributes;
-        // attributes = new std::vector<Attribute>(attributes_count);
-        // for (size_t i = 0; i < attributes_count; i++) {
-        //     attributes.at(i) = other.attributes.at(i);
-        // }
     }
     Method& operator=(const Method& other) {
         if (this != &other) {
@@ -127,19 +130,9 @@ struct Method {
             descriptor_index = other.descriptor_index;
             attributes_count = other.attributes_count;
             attributes = other.attributes;
-            // attributes = new std::vector<Attribute>(attributes_count);
-            // for (size_t i = 0; i < attributes_count; i++) {
-            //     attributes.at(i) = other.attributes.at(i);
-            // }
         }
         return *this;
     }
-    // ~Method() {
-        // for (size_t i = 0; i < attributes->size(); i++) {
-        //     delete attributes->at(i);
-        // }
-        // delete attributes;
-    // }
 };
 
 struct C_Class: public CP_info {
@@ -200,7 +193,7 @@ struct C_NameAndType: public CP_info {
 
 struct C_Utf8: public CP_info {
     unsigned char tag = 1;
-    std::string* bytes;
+    string* bytes;
 };
 
 struct C_MethodHandle: public CP_info {
