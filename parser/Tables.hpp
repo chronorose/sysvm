@@ -88,7 +88,7 @@ struct Code {
     unsigned short attributes_count;
     vector<Attribute> attributes;
     Code(ifstream& is, unsigned short name_index) {
-        attribute_name_index = name_index
+        attribute_name_index = name_index;
     }
 };
 
