@@ -9,21 +9,6 @@ struct CP_info {
     virtual ~CP_info() {}
 };
 
-struct ExceptionTable {
-    unsigned short start_pc;
-    unsigned short end_pc;
-    unsigned short handler_pc;
-    unsigned short catch_type;
-};
-
-struct Code {
-    unsigned short attribute_name_index;  
-    unsigned int attribute_length;
-    unsigned short max_stack;
-    unsigned int code_length;
-    string* code;
-};
-
 struct Attribute {
     unsigned short name_index;
     unsigned int attribute_length;
@@ -62,6 +47,48 @@ struct Attribute {
     }
     ~Attribute() {
         delete[] info;
+    }
+};
+
+struct ExceptionTable {
+    unsigned short start_pc;
+    unsigned short end_pc;
+    unsigned short handler_pc;
+    unsigned short catch_type;
+    ExceptionTable(ifstream& is) {
+        start_pc = readbytes<unsigned short>(is);
+        end_pc = readbytes<unsigned short>(is);
+        handler_pc = readbytes<unsigned short>(is);
+        catch_type = readbytes<unsigned short>(is);
+    }
+    ExceptionTable(const ExceptionTable& other) {
+        start_pc = other.start_pc;
+        end_pc = other.end_pc;
+        handler_pc = other.handler_pc;
+        catch_type = other.catch_type;
+    }
+    ExceptionTable& operator=(const ExceptionTable& other) {
+        start_pc = other.start_pc;
+        end_pc = other.end_pc;
+        handler_pc = other.handler_pc;
+        catch_type = other.catch_type;
+        return *this;
+    }
+};
+
+struct Code {
+    unsigned short attribute_name_index;  
+    unsigned int attribute_length;
+    unsigned short max_stack;
+    unsigned short max_locals;
+    unsigned int code_length;
+    string code;
+    unsigned short exception_table_length;
+    vector<ExceptionTable> exception_table;
+    unsigned short attributes_count;
+    vector<Attribute> attributes;
+    Code(ifstream& is, unsigned short name_index) {
+        attribute_name_index = name_index
     }
 };
 
