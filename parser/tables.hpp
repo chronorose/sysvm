@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Common.hpp"
-#include "ClassFile.hpp"
+#include "common.hpp"
+#include "class_file.hpp"
 
 using namespace std;
 
@@ -103,7 +103,10 @@ struct Code {
         unsigned int code_length = readbytes<unsigned int>(is);
         unsigned char* code_buf = new unsigned char[code_length + 1];
         readToBuf(is, (char*)code_buf, code_length);
-        for (size_t i = 0; i < code_length; i++) code.push_back(code_buf[i]);
+        for (size_t i = 0; i < code_length; i++) {
+            code.push_back(code_buf[i]);
+        }
+        cout << endl;
         delete[] code_buf;
         unsigned short exception_table_len = readbytes<unsigned short>(is);
         for (size_t i = 0; i < exception_table_len; i++) {
@@ -160,6 +163,7 @@ struct Method {
     unsigned short attributes_count;
     Code code;
     vector<Attribute> attributes;
+    Method() {}
     Method(ifstream& is, ClassFile& cf) {
         access_flags = readbytes<unsigned short>(is);    
         name_index = readbytes<unsigned short>(is);    

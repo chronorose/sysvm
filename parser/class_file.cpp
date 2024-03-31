@@ -1,6 +1,6 @@
-#include "Common.hpp"
-#include "ClassFile.hpp"
-#include "Tables.hpp"
+#include "common.hpp"
+#include "class_file.hpp"
+#include "tables.hpp"
 
 using namespace std;
 
@@ -15,7 +15,6 @@ CP_info* ClassFile::getCP(const unsigned short index) const {
 }
 
 C_Utf8* ClassFile::getUtf8(const unsigned short index) const {
-    // C_Utf8* ret = dynamic_cast<C_Utf8*>(this->constant_pool->at(index - 1));
     return CPi_cast<C_Utf8*>(getCP(index));
 }
 
@@ -148,26 +147,33 @@ ClassFile::ClassFile(ifstream& is) {
     }
     fields_count = readbytes<unsigned short>(is);
     for (size_t i = 0; i < fields_count; i++) {
-        Field fld(is);
+        Field* fld = new Field(is);
         fields.push_back(fld);
     }
     methods_count = readbytes<unsigned short>(is);
     for (size_t i = 0; i < methods_count; i++) {
-        Method mthd(is, *this);
+        Method* mthd = new Method(is, *this);
+        if (getUtf8(mthd->name_index)->bytes == "main") this->main = mthd;
         methods.push_back(mthd);
     }
     attributes_count = readbytes<unsigned short>(is);
     for (size_t i = 0; i < attributes_count; i++) {
-        Attribute attr(is);
+        Attribute* attr = new Attribute(is);
         attributes.push_back(attr);
     }
-    Method mthd = methods.at(1);
-    Code code = mthd.code;
+}
+
+template<typename T>
+void deleteVector(vector<T> vec) {
+    for (size_t i = 0; i < vec.size(); i++) {
+        delete vec[i];
+    }
 }
 
 ClassFile::~ClassFile() {
-    for (size_t i = 0; i < constant_pool.size(); i++) {
-        delete constant_pool[i];
-    }
+    deleteVector(constant_pool);
+    deleteVector(fields);
+    deleteVector(methods);
+    deleteVector(attributes);
 }
 
