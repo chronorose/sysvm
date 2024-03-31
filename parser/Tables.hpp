@@ -1,12 +1,18 @@
 #pragma once
 
 #include "Common.hpp"
+#include "ClassFile.hpp"
 
 using namespace std;
 
 struct CP_info {
     unsigned char tag = 0;
     virtual ~CP_info() {}
+};
+
+struct C_Utf8: public CP_info {
+    unsigned char tag = 1;
+    string bytes;
 };
 
 struct Attribute {
@@ -20,6 +26,13 @@ struct Attribute {
     }
     Attribute(ifstream& is) {
         name_index = readbytes<unsigned short>(is);
+        attribute_length = readbytes<unsigned int>(is);
+        info = new unsigned char[attribute_length + 1];
+        readToBuf(is, (char*)info, attribute_length);
+        info[attribute_length] = '\0';
+    }
+    Attribute(ifstream& is, unsigned short n_index) {
+        name_index = n_index;
         attribute_length = readbytes<unsigned int>(is);
         info = new unsigned char[attribute_length + 1];
         readToBuf(is, (char*)info, attribute_length);
@@ -77,18 +90,37 @@ struct ExceptionTable {
 };
 
 struct Code {
-    unsigned short attribute_name_index;  
-    unsigned int attribute_length;
     unsigned short max_stack;
     unsigned short max_locals;
-    unsigned int code_length;
     string code;
-    unsigned short exception_table_length;
     vector<ExceptionTable> exception_table;
-    unsigned short attributes_count;
     vector<Attribute> attributes;
-    Code(ifstream& is, unsigned short name_index) {
-        attribute_name_index = name_index;
+    Code() {}
+    Code(ifstream& is) {
+        readbytes<unsigned int>(is);
+        max_stack = readbytes<unsigned short>(is);
+        max_locals = readbytes<unsigned short>(is);
+        unsigned int code_length = readbytes<unsigned int>(is);
+        cout << "code len: " << code_length << endl;
+        unsigned char* code_buf = new unsigned char[code_length + 1];
+        readToBuf(is, (char*)code_buf, code_length);
+        code_buf[code_length] = '\0';
+        for (size_t i = 0; i < code_length; i++) {
+            cout << (int)code_buf[i] << " ";
+        }
+        cout << endl;
+        code = (char*)code_buf;
+        delete[] code_buf;
+        unsigned short exception_table_len = readbytes<unsigned short>(is);
+        for (size_t i = 0; i < exception_table_len; i++) {
+            ExceptionTable ex_table(is);
+            exception_table.push_back(ex_table);
+        }
+        unsigned short attribute_length = readbytes<unsigned short>(is);
+        for (size_t i = 0; i < attribute_length; i++) {
+            Attribute attr(is);
+            attributes.push_back(attr);
+        }
     }
 };
 
@@ -132,15 +164,24 @@ struct Method {
     unsigned short name_index;  
     unsigned short descriptor_index;
     unsigned short attributes_count;
+    Code code;
     vector<Attribute> attributes;
-    Method(ifstream& is) {
+    Method(ifstream& is, ClassFile& cf) {
         access_flags = readbytes<unsigned short>(is);    
         name_index = readbytes<unsigned short>(is);    
         descriptor_index = readbytes<unsigned short>(is);    
         attributes_count = readbytes<unsigned short>(is);    
         for (size_t i = 0; i < attributes_count; i++) {
-            Attribute attr(is);
-            attributes.push_back(attr);
+            unsigned short n_index = readbytes<unsigned short>(is);
+            string to_check = cf.getUtf8(n_index)->bytes;
+            cout << to_check << endl;
+            if (cf.getUtf8(n_index)->bytes == "Code") {
+                Code cd(is);
+                code = cd;
+            } else {
+                Attribute attr(is, n_index);
+                attributes.push_back(attr);
+            } 
         }
     }
     Method(const Method& other) {
@@ -148,6 +189,7 @@ struct Method {
         name_index = other.name_index;
         descriptor_index = other.descriptor_index;
         attributes_count = other.attributes_count;
+        code = other.code;
         attributes = other.attributes;
     }
     Method& operator=(const Method& other) {
@@ -156,6 +198,7 @@ struct Method {
             name_index = other.name_index;
             descriptor_index = other.descriptor_index;
             attributes_count = other.attributes_count;
+            code = other.code;
             attributes = other.attributes;
         }
         return *this;
@@ -216,11 +259,6 @@ struct C_NameAndType: public CP_info {
     unsigned char tag = 12;
     unsigned short name_index;
     unsigned short descriptor;
-};
-
-struct C_Utf8: public CP_info {
-    unsigned char tag = 1;
-    string* bytes;
 };
 
 struct C_MethodHandle: public CP_info {

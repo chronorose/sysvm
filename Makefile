@@ -6,7 +6,7 @@ parser := parser/
 
 parser: $(clean)
 	$(CC) $(parser)*.cpp -o $(build)parser
-	./$(build)parser examples/HelloVM.class
+	./$(build)parser examples/Factorial.class
 
 clean:
 	rm -f $(build)*
