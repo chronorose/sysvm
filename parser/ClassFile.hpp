@@ -19,14 +19,14 @@ class ClassFile {
     unsigned short major_version;  
 
     unsigned short constant_pool_count;
-    std::vector<CP_info*>* constant_pool = nullptr;
+    std::vector<CP_info*> constant_pool;
 
     unsigned short access_flags;
     unsigned short this_class;
     unsigned short super_class;
 
     unsigned short interfaces_count;
-    unsigned short* interfaces;
+    std::vector<unsigned short> interfaces;
 
     unsigned short fields_count;
     std::vector<Field> fields;
@@ -35,7 +35,7 @@ class ClassFile {
     std::vector<Method> methods;
 
     unsigned short attributes_count;
-    std::vector<Attribute*> attributes;
+    std::vector<Attribute> attributes;
 
     void readCPinfo(std::ifstream& is);
     CP_info* getCP(const unsigned short index) const; 

@@ -92,7 +92,7 @@ struct ExceptionTable {
 struct Code {
     unsigned short max_stack;
     unsigned short max_locals;
-    string code;
+    vector<unsigned char> code;
     vector<ExceptionTable> exception_table;
     vector<Attribute> attributes;
     Code() {}
@@ -101,15 +101,9 @@ struct Code {
         max_stack = readbytes<unsigned short>(is);
         max_locals = readbytes<unsigned short>(is);
         unsigned int code_length = readbytes<unsigned int>(is);
-        cout << "code len: " << code_length << endl;
         unsigned char* code_buf = new unsigned char[code_length + 1];
         readToBuf(is, (char*)code_buf, code_length);
-        code_buf[code_length] = '\0';
-        for (size_t i = 0; i < code_length; i++) {
-            cout << (int)code_buf[i] << " ";
-        }
-        cout << endl;
-        code = (char*)code_buf;
+        for (size_t i = 0; i < code_length; i++) code.push_back(code_buf[i]);
         delete[] code_buf;
         unsigned short exception_table_len = readbytes<unsigned short>(is);
         for (size_t i = 0; i < exception_table_len; i++) {
@@ -173,8 +167,6 @@ struct Method {
         attributes_count = readbytes<unsigned short>(is);    
         for (size_t i = 0; i < attributes_count; i++) {
             unsigned short n_index = readbytes<unsigned short>(is);
-            string to_check = cf.getUtf8(n_index)->bytes;
-            cout << to_check << endl;
             if (cf.getUtf8(n_index)->bytes == "Code") {
                 Code cd(is);
                 code = cd;
