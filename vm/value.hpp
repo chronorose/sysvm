@@ -13,11 +13,17 @@ enum class ValueType {
     ClassRef = 9,
     ArrayRef = 10,
     InterfaceRef = 11,
+    Void = 12,
 };
 
 struct Value {
     ValueType type;
     virtual ~Value() {}
+};
+
+struct Void: public Value {
+    ValueType type = ValueType::Void;
+    Void() {}
 };
 
 struct Int: public Value {
@@ -33,3 +39,5 @@ struct Byte: public Value {
     Byte(): value(0) {}
     Byte(char value): value(value) {}
 };
+
+Int* to_int(Value* value);

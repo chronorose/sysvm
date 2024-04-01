@@ -13,6 +13,6 @@ int main(int argc, char* argv[]) {
     ifstream is(argv[1]);
     ClassFile* cf = new ClassFile(is);
     VM vm(cf);
-    vm.execute();
+    vm.execute_vm();
     delete cf;
 }

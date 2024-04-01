@@ -2,6 +2,7 @@
 
 #include "common.hpp"
 #include "class_file.hpp"
+#include "../vm/value.hpp"
 
 using namespace std;
 
@@ -106,7 +107,6 @@ struct Code {
         for (size_t i = 0; i < code_length; i++) {
             code.push_back(code_buf[i]);
         }
-        cout << endl;
         delete[] code_buf;
         unsigned short exception_table_len = readbytes<unsigned short>(is);
         for (size_t i = 0; i < exception_table_len; i++) {
@@ -162,12 +162,14 @@ struct Method {
     unsigned short descriptor_index;
     unsigned short attributes_count;
     Code code;
+    vector<ValueType> args;
     vector<Attribute> attributes;
     Method() {}
     Method(ifstream& is, ClassFile& cf) {
         access_flags = readbytes<unsigned short>(is);    
         name_index = readbytes<unsigned short>(is);    
-        descriptor_index = readbytes<unsigned short>(is);    
+        descriptor_index = readbytes<unsigned short>(is);
+        getArgs(cf);
         attributes_count = readbytes<unsigned short>(is);    
         for (size_t i = 0; i < attributes_count; i++) {
             unsigned short n_index = readbytes<unsigned short>(is);
@@ -178,6 +180,45 @@ struct Method {
                 Attribute attr(is, n_index);
                 attributes.push_back(attr);
             } 
+        }
+    }
+    // for now i only take BaseTypes since it's basically useless with my current impl to take anything else
+    // i do not take arrays or references.
+    // i also do not typecheck, for now the use of this vector is to just know the
+    // amount of arguments i have to pop from the stack
+    void getArgs(ClassFile& cf) {
+        string descriptor = cf.getUtf8(descriptor_index)->bytes;
+        for (size_t i = 1; i < descriptor.size(); i++) {
+            switch(descriptor[i]) {
+                case 'B': 
+                    args.push_back(ValueType::Byte);
+                    break;
+                case 'C':
+                    args.push_back(ValueType::Char);
+                    break;
+                case 'D':
+                    args.push_back(ValueType::Double);
+                    break;
+                case 'F':
+                    args.push_back(ValueType::Float);
+                    break;
+                case 'I':
+                    args.push_back(ValueType::Int);
+                    break;
+                case 'J':
+                    args.push_back(ValueType::Long);
+                    break;
+                case 'S':
+                    args.push_back(ValueType::Short);
+                    break;
+                case 'Z':
+                    args.push_back(ValueType::Bool);
+                    break;
+                case ')':
+                    return;
+                default:
+                    break;
+            }
         }
     }
     Method(const Method& other) {
