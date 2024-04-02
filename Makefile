@@ -1,9 +1,14 @@
 CC := g++ -fsanitize=address
 build := build/
 parser := parser/
+test := tests/
 vm := vm/
+exclude := `ls vm/*.cpp | grep -v sysvm.cpp`
 
 .PHONY: all test clean parser empty factorial debug milestone1
+
+test:
+	$(CC) $(exclude) $(parser)*.cpp $(test)*.cpp -o $(build)sysvm
 
 valgrind:
 	g++ $(vm)*.cpp $(parser)*.cpp -o $(build)sysvm -DDEBUG
