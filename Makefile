@@ -5,6 +5,9 @@ vm := vm/
 
 .PHONY: all test clean parser empty factorial debug milestone1
 
+valgrind:
+	g++ $(vm)*.cpp $(parser)*.cpp -o $(build)sysvm -DDEBUG
+
 milestone1:
 	$(CC) $(vm)*.cpp $(parser)*.cpp -o $(build)sysvm -DMILESTONE1
 
@@ -14,9 +17,6 @@ debug:
 all: $(clean)
 	$(CC) $(vm)*.cpp $(parser)*.cpp -o $(build)sysvm
 	./$(build)sysvm examples/Factorial.class
-
-	
-
 
 clean:
 	rm -f $(build)*

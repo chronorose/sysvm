@@ -2,8 +2,8 @@
 
 ## Milestones and plans:
 ### First milestone:
-  - [ ] .class files parser (no verification)
-  - [ ] simple VM that implements subset of spec(no native methods)
+  - [x] .class files parser (no verification)
+  - [x] simple VM that implements subset of spec(no native methods)
 
 #### Criteria:
 Examples of programs that should be executed correctly:
@@ -28,13 +28,20 @@ class Factorial {
 }
 ```
  
-### Second milestone:
+### Second milestone(first iteration):
   - [ ] Garbage collector(single-threaded)
   - [ ] native methods
 
-#### Criteria:
+#### Criteria(first iteration):
 Infinite loop doesn't throw OOM exception;
 
-### Third milestone:
+### Second milestone(plans for second iteration):
+  - [ ] native methods
+  - [ ] improve on base VM(inline a lot of stuff into parser, support more bytecode commands, support all datatypes)
+
+### Third milestone(first iteration):
   - [ ] Parallel GC
   - [ ] Overall improvements across the board
+
+### Third milestone(plans for second iteration):
+  - [ ] GC (either single-threaded or parallel)
