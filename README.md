@@ -38,6 +38,7 @@ Infinite loop doesn't throw OOM exception;
 ### Second milestone(plans for second iteration):
   - [ ] native methods
   - [ ] improve on base VM(inline a lot of stuff into parser, support more bytecode commands, support all datatypes)
+  - [ ] my javap
 
 ### Third milestone(first iteration):
   - [ ] Parallel GC
