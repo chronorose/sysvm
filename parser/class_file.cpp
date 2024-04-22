@@ -18,6 +18,76 @@ C_Utf8* ClassFile::getUtf8(const unsigned short index) const {
     return CPi_cast<C_Utf8*>(getCP(index));
 }
 
+void ClassFile::debugCP(CP_info* cp, size_t i) const {
+    switch(cp->tag) {
+        case 7: {
+            C_Class* cls = dynamic_cast<C_Class*>(cp);
+            cout << "CPool number " << i << " is class with the name " << getUtf8(cls->name_index)->bytes << endl;
+            break;
+        }
+        case 9: {
+            C_Fieldref* cls = dynamic_cast<C_Fieldref*>(cp);       
+            break;
+        }
+        case 10: {
+            C_Methodref* cls = dynamic_cast<C_Methodref*>(cp);       
+            break;
+        }
+        case 11: {
+            C_InterfaceMethodref* cls = dynamic_cast<C_InterfaceMethodref*>(cp);       
+            break;
+        }
+        case 8: {
+            C_String* cls = dynamic_cast<C_String*>(cp);       
+            break;
+        }
+        case 3: {
+            C_Integer* cls = dynamic_cast<C_Integer*>(cp);       
+            break;
+        }
+        case 4: {
+            C_Float* cls = dynamic_cast<C_Float*>(cp);       
+            break;
+        }
+        case 5: {
+            C_Long* cls = dynamic_cast<C_Long*>(cp);       
+            break;
+        }
+        case 6: {
+            C_Double* cls = dynamic_cast<C_Double*>(cp);       
+            break;
+        }
+        case 12: {
+            C_NameAndType* nat = dynamic_cast<C_NameAndType*>(cp);       
+            break;
+        }
+        case 1: {
+            C_Utf8* str = dynamic_cast<C_Utf8*>(cp);       
+            cout << "CPool number " << i << " is Utf8 with the string " << str->bytes << endl;
+            break;
+        }
+        case 15: {
+            C_MethodHandle* nat = dynamic_cast<C_MethodHandle*>(cp);       
+            break;
+        }
+        case 16: {
+            C_MethodType* mt = dynamic_cast<C_MethodType*>(cp);       
+            break;
+        }
+        case 18: {
+            C_InvokeDynamic* id = dynamic_cast<C_InvokeDynamic*>(cp);       
+            break;
+        }
+    }
+}
+
+void ClassFile::debug() const {
+    cout << "Access flags: " << access_flags << endl;
+    for (size_t i = 0; i < constant_pool.size(); i++) {
+        debugCP(constant_pool.at(i), i);
+    }
+}
+
 // reads one CPinfo struct from constant pool;
 // takes vector of CPinfo and input stream;
 void ClassFile::readCPinfo(ifstream& is) {
@@ -178,6 +248,7 @@ ClassFile::ClassFile(ifstream& is) {
         Attribute* attr = new Attribute(is);
         attributes.push_back(attr);
     }
+    debug();
 }
 
 template<typename T>

@@ -37,6 +37,9 @@ public:
     void readCPinfo(std::ifstream &is);
     CP_info *getCP(const unsigned short index) const;
 
+    void debug() const;
+    void debugCP(CP_info* cp, size_t i) const;
+
     C_Utf8 *getUtf8(const unsigned short index) const;
     ClassFile(std::ifstream &is);
     ~ClassFile();
