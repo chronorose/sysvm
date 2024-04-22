@@ -131,33 +131,50 @@ void ClassFile::readCPinfo(ifstream& is) {
 }
 
 ClassFile::ClassFile(ifstream& is) {
-    magic = readbytes<unsigned int>(is);
-    minor_version = readbytes<unsigned short>(is);
-    major_version= readbytes<unsigned short>(is);
-    constant_pool_count= readbytes<unsigned short>(is);
-    for (size_t i = 0; i < constant_pool_count - 1; i++) {
+    if(!(readbytes<unsigned int>(is) == 0xCAFEBABE)) {
+        cout << "wrong file format" << endl;
+    }
+    // we skip versions
+    is.seekg(4, ios::cur);
+    int cpc = readbytes<unsigned short>(is);
+    for (size_t i = 0; i < cpc - 1; i++) {
         readCPinfo(is);
     }
+    // i read access flags but its pretty useless to me(at least currently)
     access_flags = readbytes<unsigned short>(is);
+
     this_class = readbytes<unsigned short>(is);
+    // cout << this_class << " debug" << endl;
+    // cout << (int)dynamic_cast<C_Class*>(constant_pool.at(6))->name_index << endl;
+    // cout << dynamic_cast<C_Utf8*>(constant_pool.at(7))->bytes << endl;
+
     super_class = readbytes<unsigned short>(is);
-    interfaces_count = readbytes<unsigned short>(is);
-    for (size_t i = 0; i < interfaces_count; i++) {
+
+    // cout << super_class << " debug" << endl;
+    // cout << (int)dynamic_cast<C_Class*>(constant_pool.at(1))->name_index << endl;
+    // cout << dynamic_cast<C_Utf8*>(constant_pool.at(3))->bytes << endl;
+
+    // interface count
+    unsigned short ict = readbytes<unsigned short>(is);
+    for (size_t i = 0; i < ict; i++) {
         interfaces.push_back(readbytes<unsigned short>(is));
     }
-    fields_count = readbytes<unsigned short>(is);
-    for (size_t i = 0; i < fields_count; i++) {
+    // fields count
+    unsigned short fct = readbytes<unsigned short>(is);
+    for (size_t i = 0; i < fct; i++) {
         Field* fld = new Field(is);
         fields.push_back(fld);
     }
-    methods_count = readbytes<unsigned short>(is);
-    for (size_t i = 0; i < methods_count; i++) {
+    // methods count
+    unsigned short mct = readbytes<unsigned short>(is);
+    for (size_t i = 0; i < mct; i++) {
         Method* mthd = new Method(is, *this);
         if (getUtf8(mthd->name_index)->bytes == "main") this->main = mthd;
         methods.push_back(mthd);
     }
-    attributes_count = readbytes<unsigned short>(is);
-    for (size_t i = 0; i < attributes_count; i++) {
+    // attributes count
+    unsigned short act = readbytes<unsigned short>(is);
+    for (size_t i = 0; i < act; i++) {
         Attribute* attr = new Attribute(is);
         attributes.push_back(attr);
     }

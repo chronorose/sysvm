@@ -7,6 +7,12 @@ exclude := `ls vm/*.cpp | grep -v sysvm.cpp`
 
 .PHONY: all test clean parser empty factorial debug milestone1
 
+run: cmp
+	$(build)sysvm examples/If.class
+
+cmp:
+	$(CC) $(vm)*.cpp $(parser)*.cpp -o $(build)sysvm
+
 test:
 	$(CC) $(exclude) $(parser)*.cpp $(test)*.cpp -o $(build)sysvm
 
